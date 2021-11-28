@@ -1,0 +1,7 @@
+PyDrive
+jupyter
+opencv-python
+pandas
+numpy
+matplotlib
+plotly
