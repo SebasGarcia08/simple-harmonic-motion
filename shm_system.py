@@ -42,11 +42,11 @@ class SimpleHarmonicSystem:
         result = -self.omega ** 2 * self.theta
         return result
 
-    def ek(self) -> float:
+    def kinetic_energy(self) -> float:
         return (1 / 2.0) * self.m * self.velocity()
 
-    def eu(self) -> float:
+    def potential_energy(self) -> float:
         return self.m * self.g * self.L * (1 - np.cos(self.theta))
 
-    def em(self):
-        return self.eu() + self.ek()
+    def mechanical_energy(self) -> float:
+        return self.potential_energy() + self.kinetic_energy()
