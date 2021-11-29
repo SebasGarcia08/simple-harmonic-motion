@@ -1,3 +1,4 @@
+from typing import Optional, Callable
 from dataclasses import dataclass
 import numpy as np
 
@@ -5,27 +6,47 @@ import numpy as np
 @dataclass
 class SimpleHarmonicSystem:
     theta_0: float
-    omega: float
     phi: float
     m: float
     L: float
     g: float
 
-    def theta(self, t: float) -> float:
-        return self.theta_0 * np.cos(self.omega * t + self.phi)
+    def __post_init__(self):
+        self.omega = np.sqrt(self.g / self.L)
+        self._t = 0
+        self._theta = None
 
-    def velocity(self, t: float) -> float:
-        return -self.theta_0 * self.omega * np.sin(self.omega * t + self.phi)
+    @property
+    def t(self) -> float:
+        return self._t
 
-    def acceleration(self, t: float) -> float:
-        return -self.omega ** 2 * self.theta(t)
+    @t.setter
+    def t(self, value: float) -> None:
+        self._t = value
 
-    def ek(self, t: float) -> float:
-        return (
-            (1 / 1)
-            * self.m
-            * (self.theta_0 * self.omega * np.sin(self.omega * t + self.phi))
-        )
+    @property
+    def theta(self) -> float:
+        if self._theta is not None:
+            return self._theta
+        self._theta = self.theta_0 * np.cos(self.omega * self.t + self.phi)
+        return self._theta
 
-    def eu(self, t: float) -> float:
-        return self.m * self.g * self.L * (1 - np.cos(self.theta(t)))
+    @theta.setter
+    def theta(self, value: float) -> None:
+        self._theta = value
+
+    def velocity(self) -> float:
+        return -self.theta_0 * self.omega * np.sin(self.omega * self.t + self.phi)
+
+    def acceleration(self) -> float:
+        result = -self.omega ** 2 * self.theta
+        return result
+
+    def ek(self) -> float:
+        return (1 / 2.0) * self.m * self.velocity()
+
+    def eu(self) -> float:
+        return self.m * self.g * self.L * (1 - np.cos(self.theta))
+
+    def em(self):
+        return self.eu() + self.ek()
