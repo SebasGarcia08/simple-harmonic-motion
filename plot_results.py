@@ -9,6 +9,33 @@ import numpy as np
 START_FRAME = 142
 END_FRAME = 268
 
+graphs = {
+    (
+        0,
+        1,
+    ): "theta",
+    (
+        1,
+        1,
+    ): "velocity",
+    (
+        2,
+        1,
+    ): "acceleration",
+    (
+        0,
+        2,
+    ): "mechanical_energy",
+    (
+        1,
+        2,
+    ): "kinetic_energy",
+    (
+        2,
+        2,
+    ): "potential_energy",
+}
+
 
 @dataclass
 class Result(object):
@@ -32,32 +59,6 @@ def make_figures() -> Tuple[plt.Figure, plt.Axes, Result]:
         height_ratios=heights,
     )
     video_plot = fig.add_subplot(gs[:, 0])
-    graphs = {
-        (
-            0,
-            1,
-        ): "theta",
-        (
-            1,
-            1,
-        ): "velocity",
-        (
-            2,
-            1,
-        ): "acceleration",
-        (
-            0,
-            2,
-        ): "mechanical_energy",
-        (
-            1,
-            2,
-        ): "kinetic_energy",
-        (
-            2,
-            2,
-        ): "potential_energy",
-    }
     axes: Dict[str, plt.Axes] = dict()
 
     for rowi in range(3):
@@ -94,10 +95,11 @@ class DataGenerator(object):
 
     def get_result(self, df: pd.DataFrame) -> Result:
         result_args: Dict[str, float] = dict()
-        columns: list[str] = df.columns
-        for col in columns:
-            result_args[col] = df.loc[self.current_frame, col]
 
+        for col in graphs.values():
+            print(df)
+            print(self.current_frame)
+            result_args[col] = df.loc[self.current_frame, col]
         return Result(**result_args)
 
 
@@ -117,8 +119,9 @@ class AnimationRunner(object):
 
 def main():
     video_arr, fps = read_video_array("data/raw/fisica_video.mp4")
-    exp = pd.read_csv("data/processed/experimental_data.csv")
-    tho = pd.read_csv("data/processed/theoretical_system.csv")
+    exp = pd.read_csv("data/processed/experimental_system.csv", index_col="frame")
+    tho = pd.read_csv("data/processed/theoretical_system.csv", index_col="frame")
+
     print(video_arr.shape)
 
     fig, video_axes, axes = make_figures()
@@ -126,7 +129,13 @@ def main():
     init_img = np.random.rand(video_arr.shape[-2], video_arr.shape[-1])
     video_axes.imshow(init_img)
 
-    data_gen = DataGenerator(video_arr, START_FRAME, END_FRAME, exp, tho)
+    data_gen = DataGenerator(
+        video=video_arr,
+        start_frame=START_FRAME,
+        end_frame=END_FRAME,
+        expdf=exp,
+        theodf=tho,
+    )
     runner = AnimationRunner(video_axes=video_axes, values_axes=axes)
 
     ani = animation.FuncAnimation(

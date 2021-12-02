@@ -43,7 +43,7 @@ class SimpleHarmonicSystem:
         return result
 
     def kinetic_energy(self) -> float:
-        return (1 / 2.0) * self.m * self.velocity()
+        return (1 / 2.0) * self.m * self.velocity() ** 2
 
     def potential_energy(self) -> float:
         return self.m * self.g * self.L * (1 - np.cos(self.theta))
